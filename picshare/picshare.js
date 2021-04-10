@@ -4442,6 +4442,7 @@ var $author$project$Picshare$initialModel = {
 	caption: 'Surfing',
 	comments: _List_fromArray(
 		['Cowabunga, dude!']),
+	id: 1,
 	liked: false,
 	newComment: '',
 	url: $author$project$Picshare$baseUrl + '1.jpg'
