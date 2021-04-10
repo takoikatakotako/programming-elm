@@ -1,11 +1,18 @@
 module Picshare exposing (main)
 
--- START:import.browser
 import Browser
--- END:import.browser
 import Html exposing (..)
 import Html.Attributes exposing (class, src)
 import Html.Events exposing (onClick)
+
+
+-- START:model.alias
+type alias Model =
+    { url : String
+    , caption : String
+    , liked : Bool
+    }
+-- END:model.alias
 
 
 baseUrl : String
@@ -13,7 +20,9 @@ baseUrl =
     "https://programming-elm.com/"
 
 
-initialModel : { url : String, caption : String, liked : Bool }
+-- START:initialModel.annotation
+initialModel : Model
+-- END:initialModel.annotation
 initialModel =
     { url = baseUrl ++ "1.jpg"
     , caption = "Surfing"
@@ -21,9 +30,9 @@ initialModel =
     }
 
 
-viewDetailedPhoto :
-    { url : String, caption : String, liked : Bool }
-    -> Html Msg
+-- START:viewDetailedPhoto.annotation
+viewDetailedPhoto : Model -> Html Msg
+-- END:viewDetailedPhoto.annotation
 viewDetailedPhoto model =
     let
         buttonClass =
@@ -56,7 +65,9 @@ viewDetailedPhoto model =
         ]
 
 
-view : { url : String, caption : String, liked : Bool } -> Html Msg
+-- START:view.annotation
+view : Model -> Html Msg
+-- END:view.annotation
 view model =
     div []
         [ div [ class "header" ]
@@ -71,27 +82,24 @@ type Msg
     | Unlike
 
 
--- START:update
-update :
-    Msg
-    -> { url : String, caption : String, liked : Bool }
-    -> { url : String, caption : String, liked : Bool }
+-- START:update.annotation
+update : Msg -> Model -> Model
+-- END:update.annotation
 update msg model =
-    case msg of -- (1)
-        Like -> -- (2)
+    case msg of
+        Like ->
             { model | liked = True }
 
-        Unlike -> -- (3)
+        Unlike ->
             { model | liked = False }
--- END:update
 
 
--- START:main
-main : Program () { url : String, caption : String, liked : Bool } Msg
+-- START:main.annotation
+main : Program () Model Msg
+-- END:main.annotation
 main =
     Browser.sandbox
         { init = initialModel
         , view = view
         , update = update
         }
--- END:main
