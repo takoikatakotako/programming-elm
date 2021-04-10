@@ -1,28 +1,67 @@
 module Picshare exposing (main)
--- import Html exposing (Html, div, h1, text)
+
 import Html exposing (..)
 import Html.Attributes exposing (class, src)
+-- START:import.events
+import Html.Events exposing (onClick)
+-- END:import.events
+
 
 baseUrl : String
 baseUrl =
     "https://programming-elm.com/"
 
-initialModel : { url : String, caption : String }
+
+-- START:model
+initialModel : { url : String, caption : String, liked : Bool }
 initialModel =
     { url = baseUrl ++ "1.jpg"
     , caption = "Surfing"
+    , liked = False
     }
+-- END:model
 
-viewDetailedPhoto : { url : String, caption : String } -> Html msg
+
+-- START:viewDetailedPhoto
+viewDetailedPhoto : -- (1)
+    { url : String, caption : String, liked : Bool }
+    -> Html Msg
 viewDetailedPhoto model =
+    let
+        buttonClass = -- (2)
+            if model.liked then
+                "fa-heart"
+
+            else
+                "fa-heart-o"
+
+        msg = -- (3)
+            if model.liked then
+                Unlike
+
+            else
+                Like
+    in
     div [ class "detailed-photo" ]
         [ img [ src model.url ] []
         , div [ class "photo-info" ]
-            [ h2 [ class "caption" ] [ text model.caption ] ]
+            [ div [ class "like-button" ]
+                [ i -- (4)
+                    [ class "fa fa-2x" -- (5)
+                    , class buttonClass -- (6)
+                    , onClick msg -- (7)
+                    ]
+                    []
+                ]
+            , h2 [ class "caption" ] [ text model.caption ]
+            ]
         ]
+-- END:viewDetailedPhoto
 
 
-view : { url : String, caption : String } -> Html msg
+-- START:view.annotation
+view : { url : String, caption : String, liked : Bool } -> Html Msg
+-- END:view.annotation
 view model =
     div []
         [ div [ class "header" ]
@@ -31,6 +70,16 @@ view model =
             [ viewDetailedPhoto model ]
         ]
 
-main : Html msg
-main = 
+
+-- START:msg
+type Msg
+    = Like
+    | Unlike
+-- END:msg
+
+
+-- START:main.annotation
+main : Html Msg
+-- END:main.annotation
+main =
     view initialModel
