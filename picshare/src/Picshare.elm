@@ -3,12 +3,13 @@ module Picshare exposing (main)
 import Browser
 import Html exposing (..)
 -- START:imports
-import Html.Attributes exposing (class, placeholder, src, type_)
+import Html.Attributes
+    exposing
+        ( class, disabled, placeholder, src, type_, value )
+import Html.Events exposing (onClick, onInput, onSubmit)
 -- END:imports
-import Html.Events exposing (onClick)
 
 
--- START:model.alias
 type alias Model =
     { url : String
     , caption : String
@@ -16,7 +17,6 @@ type alias Model =
     , comments : List String
     , newComment : String
     }
--- END:model.alias
 
 
 baseUrl : String
@@ -24,7 +24,6 @@ baseUrl =
     "https://programming-elm.com/"
 
 
--- START:initialModel
 initialModel : Model
 initialModel =
     { url = baseUrl ++ "1.jpg"
@@ -33,7 +32,6 @@ initialModel =
     , comments = [ "Cowabunga, dude!" ]
     , newComment = ""
     }
--- END:initialModel
 
 
 viewLoveButton : Model -> Html Msg
@@ -56,17 +54,14 @@ viewLoveButton model =
         ]
 
 
--- START:viewComment
 viewComment : String -> Html Msg
 viewComment comment =
     li []
         [ strong [] [ text "Comment:" ]
         , text (" " ++ comment)
         ]
--- END:viewComment
 
 
--- START:viewCommentList
 viewCommentList : List String -> Html Msg
 viewCommentList comments =
     case comments of
@@ -78,28 +73,30 @@ viewCommentList comments =
                 [ ul []
                     (List.map viewComment comments)
                 ]
--- END:viewCommentList
 
 
--- START:viewComments
 viewComments : Model -> Html Msg
+-- START:viewComments
 viewComments model =
     div []
         [ viewCommentList model.comments
-        , form [ class "new-comment" ]
+        , form [ class "new-comment", onSubmit SaveComment ] -- (1)
             [ input
                 [ type_ "text"
                 , placeholder "Add a comment..."
+                , value model.newComment -- (2)
+                , onInput UpdateComment -- (3)
                 ]
                 []
-            , button [] [ text "Save" ]
+            , button
+                [ disabled (String.isEmpty model.newComment) ] -- (4)
+                [ text "Save" ]
             ]
         ]
 -- END:viewComments
 
 
 viewDetailedPhoto : Model -> Html Msg
--- START:viewDetailedPhoto
 viewDetailedPhoto model =
     div [ class "detailed-photo" ]
         [ img [ src model.url ] []
@@ -109,7 +106,6 @@ viewDetailedPhoto model =
             , viewComments model
             ]
         ]
--- END:viewDetailedPhoto
 
 
 view : Model -> Html Msg
@@ -122,15 +118,46 @@ view model =
         ]
 
 
+-- START:msg
 type Msg
     = ToggleLike
+    | UpdateComment String
+    | SaveComment
+-- END:msg
+
+
+-- START:saveNewComment
+saveNewComment : Model -> Model
+saveNewComment model =
+    let
+        comment =
+            String.trim model.newComment
+    in
+    case comment of
+        "" ->
+            model
+
+        _ ->
+            { model
+                | comments = model.comments ++ [ comment ]
+                , newComment = ""
+            }
+-- END:saveNewComment
 
 
 update : Msg -> Model -> Model
+-- START:update
 update msg model =
     case msg of
         ToggleLike ->
             { model | liked = not model.liked }
+
+        UpdateComment comment ->
+            { model | newComment = comment }
+
+        SaveComment ->
+            saveNewComment model
+-- END:update
 
 
 main : Program () Model Msg
