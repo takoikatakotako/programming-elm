@@ -5,12 +5,12 @@ import Html exposing (..)
 import Html.Attributes exposing (class, disabled, placeholder, src, type_, value)
 import Html.Events exposing (onClick, onInput, onSubmit)
 -- START:imports
+import Http
+-- END:imports
 import Json.Decode exposing (Decoder, bool, int, list, string, succeed)
 import Json.Decode.Pipeline exposing (hardcoded, required)
--- END:imports
 
 
--- START:aliases
 type alias Id =
     Int
 
@@ -27,10 +27,8 @@ type alias Photo =
 
 type alias Model =
     Photo
--- END:aliases
 
 
--- START:photoDecoder
 photoDecoder : Decoder Photo
 photoDecoder =
     succeed Photo
@@ -40,7 +38,6 @@ photoDecoder =
         |> required "liked" bool
         |> required "comments" (list string)
         |> hardcoded ""
--- END:photoDecoder
 
 
 baseUrl : String
@@ -57,6 +54,23 @@ initialModel =
     , comments = [ "Cowabunga, dude!" ]
     , newComment = ""
     }
+
+
+-- START:init
+init : () -> ( Model, Cmd Msg )
+init () =
+    ( initialModel, fetchFeed )
+-- END:init
+
+
+-- START:fetchFeed
+fetchFeed : Cmd Msg
+fetchFeed =
+    Http.get
+        { url = baseUrl ++ "feed/1"
+        , expect = Http.expectJson LoadFeed photoDecoder
+        }
+-- END:fetchFeed
 
 
 viewLoveButton : Model -> Html Msg
@@ -141,10 +155,13 @@ view model =
         ]
 
 
+-- START:msg
 type Msg
     = ToggleLike
     | UpdateComment String
     | SaveComment
+    | LoadFeed (Result Http.Error Photo)
+-- END:msg
 
 
 saveNewComment : Model -> Model
@@ -164,23 +181,44 @@ saveNewComment model =
             }
 
 
-update : Msg -> Model -> Model
+-- START:update
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         ToggleLike ->
-            { model | liked = not model.liked }
+            ( { model | liked = not model.liked }
+            , Cmd.none
+            )
 
         UpdateComment comment ->
-            { model | newComment = comment }
+            ( { model | newComment = comment }
+            , Cmd.none
+            )
 
         SaveComment ->
-            saveNewComment model
+            ( saveNewComment model
+            , Cmd.none
+            )
+
+        LoadFeed _ ->
+            ( model, Cmd.none )
+-- END:update
+
+
+-- START:subscriptions
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.none
+-- END:subscriptions
 
 
 main : Program () Model Msg
+-- START:main
 main =
-    Browser.sandbox
-        { init = initialModel
+    Browser.element
+        { init = init
         , view = view
         , update = update
+        , subscriptions = subscriptions
         }
+-- END:main
