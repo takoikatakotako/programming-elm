@@ -1,10 +1,11 @@
 module Picshare exposing (main)
 
+-- START:import.browser
+import Browser
+-- END:import.browser
 import Html exposing (..)
 import Html.Attributes exposing (class, src)
--- START:import.events
 import Html.Events exposing (onClick)
--- END:import.events
 
 
 baseUrl : String
@@ -12,30 +13,27 @@ baseUrl =
     "https://programming-elm.com/"
 
 
--- START:model
 initialModel : { url : String, caption : String, liked : Bool }
 initialModel =
     { url = baseUrl ++ "1.jpg"
     , caption = "Surfing"
     , liked = False
     }
--- END:model
 
 
--- START:viewDetailedPhoto
-viewDetailedPhoto : -- (1)
+viewDetailedPhoto :
     { url : String, caption : String, liked : Bool }
     -> Html Msg
 viewDetailedPhoto model =
     let
-        buttonClass = -- (2)
+        buttonClass =
             if model.liked then
                 "fa-heart"
 
             else
                 "fa-heart-o"
 
-        msg = -- (3)
+        msg =
             if model.liked then
                 Unlike
 
@@ -46,22 +44,19 @@ viewDetailedPhoto model =
         [ img [ src model.url ] []
         , div [ class "photo-info" ]
             [ div [ class "like-button" ]
-                [ i -- (4)
-                    [ class "fa fa-2x" -- (5)
-                    , class buttonClass -- (6)
-                    , onClick msg -- (7)
+                [ i
+                    [ class "fa fa-2x"
+                    , class buttonClass
+                    , onClick msg
                     ]
                     []
                 ]
             , h2 [ class "caption" ] [ text model.caption ]
             ]
         ]
--- END:viewDetailedPhoto
 
 
--- START:view.annotation
 view : { url : String, caption : String, liked : Bool } -> Html Msg
--- END:view.annotation
 view model =
     div []
         [ div [ class "header" ]
@@ -71,15 +66,32 @@ view model =
         ]
 
 
--- START:msg
 type Msg
     = Like
     | Unlike
--- END:msg
 
 
--- START:main.annotation
-main : Html Msg
--- END:main.annotation
+-- START:update
+update :
+    Msg
+    -> { url : String, caption : String, liked : Bool }
+    -> { url : String, caption : String, liked : Bool }
+update msg model =
+    case msg of -- (1)
+        Like -> -- (2)
+            { model | liked = True }
+
+        Unlike -> -- (3)
+            { model | liked = False }
+-- END:update
+
+
+-- START:main
+main : Program () { url : String, caption : String, liked : Bool } Msg
 main =
-    view initialModel
+    Browser.sandbox
+        { init = initialModel
+        , view = view
+        , update = update
+        }
+-- END:main
