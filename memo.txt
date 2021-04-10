@@ -1,0 +1,39 @@
+## サポートページ
+
+https://book.mynavi.jp/supportsite/detail/9784839970048.html
+
+
+## 1章
+
+elm repl
+
+"Hello Elm"
+meaningOfLife = 42
+
+sayHello name = "Hello, " ++ name ++ "."
+sayHello "Elm"
+
+sayHello greeting name = greeting ++ ", " ++ name ++ "."
+sayHello "Hello" "Elm"
+
+
+woodchunk canChunk = if canChunk then "Chunking Wood!" else "No Chunking!"
+woodchunk True
+woodchunk False
+
+
+elm make src/Main.elm
+
+
+#### 1.3 
+
+elm repl
+
+greeting = ["hi", "hello", "yo"]
+
+写真共有アプリを作り始めるところ
+
+elm init
+
+elm make src/Picshare.elm --output picshare.js
+
