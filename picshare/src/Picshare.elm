@@ -6,13 +6,11 @@ import Html.Attributes exposing (class, src)
 import Html.Events exposing (onClick)
 
 
--- START:model.alias
 type alias Model =
     { url : String
     , caption : String
     , liked : Bool
     }
--- END:model.alias
 
 
 baseUrl : String
@@ -20,9 +18,7 @@ baseUrl =
     "https://programming-elm.com/"
 
 
--- START:initialModel.annotation
 initialModel : Model
--- END:initialModel.annotation
 initialModel =
     { url = baseUrl ++ "1.jpg"
     , caption = "Surfing"
@@ -30,10 +26,9 @@ initialModel =
     }
 
 
--- START:viewDetailedPhoto.annotation
-viewDetailedPhoto : Model -> Html Msg
--- END:viewDetailedPhoto.annotation
-viewDetailedPhoto model =
+-- START:viewLoveButton
+viewLoveButton : Model -> Html Msg
+viewLoveButton model =
     let
         buttonClass =
             if model.liked then
@@ -41,33 +36,32 @@ viewDetailedPhoto model =
 
             else
                 "fa-heart-o"
-
-        msg =
-            if model.liked then
-                Unlike
-
-            else
-                Like
     in
+    div [ class "like-button" ]
+        [ i
+            [ class "fa fa-2x"
+            , class buttonClass
+            , onClick ToggleLike
+            ]
+            []
+        ]
+-- END:viewLoveButton
+
+
+-- START:viewDetailedPhoto
+viewDetailedPhoto : Model -> Html Msg
+viewDetailedPhoto model =
     div [ class "detailed-photo" ]
         [ img [ src model.url ] []
         , div [ class "photo-info" ]
-            [ div [ class "like-button" ]
-                [ i
-                    [ class "fa fa-2x"
-                    , class buttonClass
-                    , onClick msg
-                    ]
-                    []
-                ]
+            [ viewLoveButton model
             , h2 [ class "caption" ] [ text model.caption ]
             ]
         ]
+-- END:viewDetailedPhoto
 
 
--- START:view.annotation
 view : Model -> Html Msg
--- END:view.annotation
 view model =
     div []
         [ div [ class "header" ]
@@ -77,26 +71,22 @@ view model =
         ]
 
 
+-- START:msg
 type Msg
-    = Like
-    | Unlike
+    = ToggleLike
+-- END:msg
 
 
--- START:update.annotation
+-- START:update
 update : Msg -> Model -> Model
--- END:update.annotation
 update msg model =
     case msg of
-        Like ->
-            { model | liked = True }
-
-        Unlike ->
-            { model | liked = False }
+        ToggleLike ->
+            { model | liked = not model.liked }
+-- END:update
 
 
--- START:main.annotation
 main : Program () Model Msg
--- END:main.annotation
 main =
     Browser.sandbox
         { init = initialModel
