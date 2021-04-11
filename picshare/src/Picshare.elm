@@ -12,7 +12,6 @@ import Json.Decode.Pipeline exposing (hardcoded, required)
 type alias Id =
     Int
 
-
 type alias Photo =
     { id : Id
     , url : String
