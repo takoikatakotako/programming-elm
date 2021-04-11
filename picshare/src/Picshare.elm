@@ -12,6 +12,7 @@ import Json.Decode.Pipeline exposing (hardcoded, required)
 type alias Id =
     Int
 
+
 type alias Photo =
     { id : Id
     , url : String
@@ -22,8 +23,16 @@ type alias Photo =
     }
 
 
+-- START:feed.alias
+type alias Feed =
+    List Photo
+-- END:feed.alias
+
+
+-- START:model.alias
 type alias Model =
-    { photo : Maybe Photo }
+    { feed : Maybe Feed }
+-- END:model.alias
 
 
 photoDecoder : Decoder Photo
@@ -45,7 +54,7 @@ baseUrl =
 initialModel : Model
 -- START:initialModel
 initialModel =
-    { photo = Nothing }
+    { feed = Nothing }
 -- END:initialModel
 
 
@@ -55,11 +64,13 @@ init () =
 
 
 fetchFeed : Cmd Msg
+-- START:fetchFeed
 fetchFeed =
     Http.get
-        { url = baseUrl ++ "feed/1"
-        , expect = Http.expectJson LoadFeed photoDecoder
+        { url = baseUrl ++ "feed"
+        , expect = Http.expectJson LoadFeed (list photoDecoder)
         }
+-- END:fetchFeed
 
 
 viewLoveButton : Photo -> Html Msg
@@ -76,7 +87,9 @@ viewLoveButton photo =
         [ i
             [ class "fa fa-2x"
             , class buttonClass
-            , onClick ToggleLike
+            -- START:viewLoveButton
+            -- , onClick ToggleLike
+            -- END:viewLoveButton
             ]
             []
         ]
@@ -107,12 +120,14 @@ viewComments : Photo -> Html Msg
 viewComments photo =
     div []
         [ viewCommentList photo.comments
-        , form [ class "new-comment", onSubmit SaveComment ]
+        -- START:viewComments
+        , form [ class "new-comment" {- , onSubmit SaveComment -} ]
             [ input
                 [ type_ "text"
                 , placeholder "Add a comment..."
                 , value photo.newComment
-                , onInput UpdateComment
+                -- , onInput UpdateComment
+        -- END:viewComments
                 ]
                 []
             , button
@@ -134,12 +149,12 @@ viewDetailedPhoto photo =
         ]
 
 
-viewFeed : Maybe Photo -> Html Msg
 -- START:viewFeed
-viewFeed maybePhoto =
-    case maybePhoto of
-        Just photo ->
-            viewDetailedPhoto photo
+viewFeed : Maybe Feed -> Html Msg
+viewFeed maybeFeed =
+    case maybeFeed of
+        Just feed ->
+            div [] (List.map viewDetailedPhoto feed)
 
         Nothing ->
             div [ class "loading-feed" ]
@@ -153,7 +168,9 @@ view model =
         [ div [ class "header" ]
             [ h1 [] [ text "Picshare" ] ]
         , div [ class "content-flow" ]
-            [ viewFeed model.photo ]
+            -- START:view
+            [ viewFeed model.feed ]
+            -- END:view
         ]
 
 
@@ -161,7 +178,9 @@ type Msg
     = ToggleLike
     | UpdateComment String
     | SaveComment
-    | LoadFeed (Result Http.Error Photo)
+    -- START:msg
+    | LoadFeed (Result Http.Error Feed)
+    -- END:msg
 
 
 saveNewComment : Photo -> Photo
@@ -199,6 +218,8 @@ updateFeed updatePhoto maybePhoto =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        -- START:update
+        {-
         ToggleLike ->
             ( { model
                 | photo = updateFeed toggleLike model.photo
@@ -219,16 +240,19 @@ update msg model =
               }
             , Cmd.none
             )
+        -}
 
--- START:update
-        LoadFeed (Ok photo) ->
-            ( { model | photo = Just photo }
+        LoadFeed (Ok feed) ->
+            ( { model | feed = Just feed }
             , Cmd.none
             )
 
         LoadFeed (Err _) ->
             ( model, Cmd.none )
--- END:update
+
+        _ ->
+            ( model, Cmd.none )
+        -- END:update
 
 
 subscriptions : Model -> Sub Msg
