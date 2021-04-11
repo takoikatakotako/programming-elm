@@ -37,3 +37,5 @@ elm init
 
 elm make src/Picshare.elm --output picshare.js
 
+
+elm make --output debugging.html src/Debugging.elm
